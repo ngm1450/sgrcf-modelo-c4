@@ -1,0 +1,32 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_LEFT_RIGHT()
+
+' Atores
+Person(porteiro, "Colaborador da Portaria/Zeladoria", "Entrega e recebe chaves, registra retiradas e devoluções.")
+Person(usuario, "Usuário Autorizado", "Funcionário, terceiro ou prestador que utiliza chaves.")
+Person(gestor, "Gestor/Administrador", "Configura regras de acesso e consulta relatórios/auditorias.")
+
+' Sistema principal
+System_Boundary(sgrcf_boundary, "SGRCF - Sistema de Gestão e Rastreamento de Chaves Físicas") {
+    System(sgrcf, "SGRCF", "Plataforma web para governança do ciclo de vida de chaves físicas.")
+}
+
+' Sistemas externos
+System_Ext(armario, "Armário/Chaveiro Inteligente", "Dispositivo físico para guarda/liberação de chaves, integrado ao SGRCF.")
+System_Ext(diretorio, "Diretório Corporativo / SSO", "Autenticação de usuários (AD/LDAP, SSO, etc.).")
+System_Ext(email, "Serviço de E-mail / Notificações", "Envio de alertas de empréstimo, atraso e extravio.")
+System_Ext(gestaoPredial, "Sistema de Gestão Predial / Facilities", "Opcional: consome dados de acesso para gestão e auditoria.")
+
+' Relações atores -> sistema
+Rel(usuario, sgrcf, "Solicita empréstimo/devolução, consulta histórico de chaves")
+Rel(porteiro, sgrcf, "Registra entregas/devoluções, acompanha chaves pendentes")
+Rel(gestor, sgrcf, "Define autorizações, horários e consulta relatórios de auditoria")
+
+' Relações sistema -> externos
+Rel(sgrcf, armario, "Controla liberação e retorno de chaves via", "API/IoT")
+Rel(sgrcf, diretorio, "Autentica usuários em", "SSO / LDAP")
+Rel(sgrcf, email, "Envia notificações de eventos de chave via", "SMTP/API")
+Rel(sgrcf, gestaoPredial, "Exporta logs e relatórios para", "API/integrações")
+@enduml

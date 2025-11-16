@@ -1,0 +1,111 @@
+@startuml sgrcf-componentes-api-core
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+LAYOUT_LEFT_RIGHT()
+
+Person(porteiro, "Colaborador Portaria/Zeladoria", "Registra entregas e devoluções.")
+Person(usuario, "Usuário Autorizado", "Solicita e utiliza chaves.")
+Person(gestor, "Gestor/Administrador", "Configura políticas e consulta relatórios.")
+
+Container(webPortaria, "Portal da Portaria", "Web App", "Interface para operações de entrega e devolução.")
+Container(webGestao, "Portal Administrativo", "Web App", "Interface para gestão de políticas e relatórios.")
+Container(webUsuario, "Portal do Usuário", "Web/Mobile", "Interface para solicitações de chaves.")
+ContainerDb(db, "Banco de Dados", "PostgreSQL", "Dados transacionais do SGRCF.")
+ContainerDb(dbAudit, "Banco de Auditoria", "PostgreSQL/Timescale", "Eventos e trilhas de auditoria.")
+Container(cache, "Cache", "Redis", "Sessões e dados temporários.")
+Container(queue, "Fila de Eventos", "Kafka/RabbitMQ", "Eventos de domínio para integração e notificações.")
+Container(svcArmario, "Gateway Armários Inteligentes", "Microsserviço", "Integração com hardware IoT de armários/chaveiros.")
+Container(svcNotificacoes, "Serviço de Notificações", "Microsserviço", "Envio de e-mail, SMS e push.")
+Container(svcPredial, "Serviço Integração Predial", "Microsserviço", "Publica dados para sistemas de facilities.")
+Container(sso, "Diretório Corporativo / SSO", "IdP", "Autenticação e grupos de usuários.")
+
+Container_Boundary(apiCore, "API Core SGRCF") {
+
+  Component(cAuth, "AuthController", "REST Controller", "Endpoints de login (quando aplicável), refresh de token, verificação de sessão e informações básicas do usuário.")
+  Component(cChaves, "ChaveController", "REST Controller", "Endpoints para cadastro, consulta e manutenção de chaves e armários lógicos.")
+  Component(cEmprestimos, "EmprestimoController", "REST Controller", "Endpoints para solicitar empréstimos, registrar retiradas, devoluções e consultar pendências.")
+  Component(cPoliticas, "PoliticaAcessoController", "REST Controller", "Endpoints para CRUD de políticas de acesso (quem pode pegar qual chave, quando e por quanto tempo).")
+  Component(cRelatorios, "RelatorioController", "REST Controller", "Endpoints para geração de relatórios operacionais e de auditoria.")
+  Component(cAdminUsuarios, "UsuarioAdminController", "REST Controller", "Endpoints administrativos para gestão de usuários, perfis e vínculos com o diretório corporativo.")
+
+  Component(sAuth, "AuthService", "Service", "Coordena autenticação e autorização em conjunto com o diretório corporativo e o AuthorizationService.")
+  Component(sUsuario, "UsuarioService", "Service", "Regras de negócio relacionadas a usuários, perfis e associação com políticas.")
+  Component(sChaves, "ChaveService", "Service", "Regras para cadastro, alteração, desativação e consulta de chaves e grupos de chaves.")
+  Component(sEmprestimos, "EmprestimoService", "Service", "Orquestra todo o fluxo de empréstimo e devolução de chaves, incluindo validação, reserva, efetivação e encerramento.")
+  Component(sPoliticas, "PoliticaAcessoService", "Service", "Gerencia políticas de acesso, regras de horário, papéis e restrições específicas por chave.")
+  Component(sAuditoria, "AuditoriaService", "Service", "Centraliza o registro de eventos de auditoria relevantes, como empréstimos, devoluções, recusas e alterações de políticas.")
+  Component(sEventos, "EventoDominioPublisher", "Service", "Publica eventos de domínio na fila para notificação, integração predial e outros consumidores.")
+  Component(sArmarios, "ArmarioIntegrationService", "Service", "Orquestra comunicação com o serviço de gateway de armários inteligentes para liberação e leitura de status.")
+  Component(sNotificacaoDomain, "NotificacaoDomainService", "Service", "Determina quais notificações devem ser disparadas com base em eventos de domínio (atraso, extravio, etc.).")
+
+  Component(sAuthorization, "AuthorizationService", "Service", "Avalia se um usuário pode pegar ou devolver uma chave, considerando políticas, perfis e horários.")
+  Component(sAccessDecision, "AccessDecisionEngine", "Domain Service", "Motor de decisão que aplica regras de autorização e gera um resultado auditável (permitido/negado com motivo).")
+
+  ComponentDb(rUsuarios, "UsuarioRepository", "Repository", "Operações de acesso a dados de usuários e perfis.")
+  ComponentDb(rChaves, "ChaveRepository", "Repository", "Operações de acesso a dados de chaves e armários lógicos.")
+  ComponentDb(rEmprestimos, "EmprestimoRepository", "Repository", "Persistência de empréstimos, devoluções, estados e histórico de uso.")
+  ComponentDb(rPoliticas, "PoliticaAcessoRepository", "Repository", "Persistência de políticas de acesso, regras e vínculos com usuários/grupos.")
+  ComponentDb(rAuditoria, "EventoAuditoriaRepository", "Repository", "Persistência dos eventos de auditoria em banco dedicado ou partição específica.")
+
+  Component(sCacheAdapter, "CacheAdapter", "Infra Component", "Abstração para acesso ao cache Redis (tokens, sessões, permissões derivadas).")
+  Component(sQueueAdapter, "QueueAdapter", "Infra Component", "Abstração para publicação de mensagens na fila de eventos.")
+  Component(sSsoAdapter, "SsoAdapter", "Infra Component", "Integração com o diretório corporativo / SSO (consulta de grupos, claims, etc.).")
+  Component(sMapper, "DTO/Entity Mappers", "Infra Component", "Conversão entre entidades de domínio, DTOs de entrada/saída e objetos de persistência.")
+  Component(sValidators, "Validators", "Infra Component", "Conjunto de validadores de regras específicas (horário válido, chave ativa, usuário habilitado, etc.).")
+}
+
+Rel(porteiro, webPortaria, "Utiliza via navegador")
+Rel(usuario, webUsuario, "Utiliza via navegador ou mobile")
+Rel(gestor, webGestao, "Utiliza via navegador")
+
+Rel(webPortaria, cEmprestimos, "Requisições HTTP")
+Rel(webPortaria, cChaves, "Requisições HTTP")
+Rel(webGestao, cPoliticas, "Requisições HTTP")
+Rel(webGestao, cRelatorios, "Requisições HTTP")
+Rel(webGestao, cAdminUsuarios, "Requisições HTTP")
+Rel(webUsuario, cEmprestimos, "Requisições HTTP")
+Rel(webUsuario, cAuth, "Autenticação / sessão")
+
+Rel(cAuth, sAuth, "Chama")
+Rel(cAdminUsuarios, sUsuario, "Chama")
+Rel(cChaves, sChaves, "Chama")
+Rel(cEmprestimos, sEmprestimos, "Chama")
+Rel(cPoliticas, sPoliticas, "Chama")
+Rel(cRelatorios, sAuditoria, "Consulta trilhas e relatórios")
+
+Rel(sAuth, sSsoAdapter, "Consulta identidade / grupos no SSO")
+Rel(sAuth, sAuthorization, "Consulta autorização de alto nível")
+Rel(sUsuario, rUsuarios, "Lê/Escreve dados de usuários")
+Rel(sChaves, rChaves, "Lê/Escreve dados de chaves")
+Rel(sPoliticas, rPoliticas, "Lê/Escreve políticas")
+Rel(sEmprestimos, sAuthorization, "Verifica se empréstimo é permitido")
+Rel(sEmprestimos, sAccessDecision, "Obtém decisão detalhada de acesso")
+Rel(sEmprestimos, rEmprestimos, "Lê/Escreve dados de empréstimos")
+Rel(sEmprestimos, sArmarios, "Solicita liberação e leitura de status do armário")
+Rel(sEmprestimos, sAuditoria, "Registra eventos de auditoria")
+Rel(sEmprestimos, sEventos, "Publica eventos de domínio")
+Rel(sNotificacaoDomain, sEventos, "Publica eventos de notificação de alto nível")
+Rel(sEventos, sQueueAdapter, "Publica mensagens na fila")
+
+Rel(sAuthorization, sAccessDecision, "Delegação de avaliação de regras")
+Rel(sAuthorization, sCacheAdapter, "Utiliza cache para regras derivadas e permissões")
+Rel(sAccessDecision, rPoliticas, "Consulta políticas de acesso")
+Rel(sAccessDecision, rUsuarios, "Consulta vínculos de usuários / grupos / papéis")
+
+Rel(sAuditoria, rAuditoria, "Lê/Escreve eventos de auditoria")
+Rel(sAuditoria, dbAudit, "Persiste eventos consolidados")
+Rel(rAuditoria, dbAudit, "Persistência física")
+
+Rel(rUsuarios, db, "Lê/Escreve")
+Rel(rChaves, db, "Lê/Escreve")
+Rel(rEmprestimos, db, "Lê/Escreve")
+Rel(rPoliticas, db, "Lê/Escreve")
+
+Rel(sCacheAdapter, cache, "Lê/Escreve chaves de cache")
+Rel(sQueueAdapter, queue, "Publica mensagens")
+Rel(sSsoAdapter, sso, "Chama APIs do IdP")
+
+Rel(sArmarios, svcArmario, "Chama APIs do gateway de armários")
+Rel(sEventos, svcNotificacoes, "Opcionalmente publica eventos específicos", "Dependendo da implementação (direct call ou via fila)")
+Rel(sEventos, svcPredial, "Opcionalmente encaminha eventos para integração predial", "Direct call ou via fila")
+
+@enduml

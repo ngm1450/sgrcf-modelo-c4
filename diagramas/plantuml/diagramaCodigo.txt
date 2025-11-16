@@ -1,0 +1,158 @@
+@startuml sgrcf-codigo
+skinparam classAttributeIconSize 0
+hide circle
+
+class EmprestimoController {
+  +solicitarEmprestimo(usuarioId: Long, chaveId: Long, motivo: String): EmprestimoDTO
+  +registrarRetirada(emprestimoId: Long): void
+  +registrarDevolucao(emprestimoId: Long): void
+  +listarPendencias(usuarioId: Long): List<EmprestimoDTO>
+}
+
+class EmprestimoService {
+  -authorizationService: AuthorizationService
+  -auditoriaService: AuditoriaService
+  -armarioIntegrationService: ArmarioIntegrationService
+  -usuarioRepository: UsuarioRepository
+  -chaveRepository: ChaveRepository
+  -emprestimoRepository: EmprestimoRepository
+
+  +solicitar(usuarioId: Long, chaveId: Long, motivo: String): Emprestimo
+  +retirar(emprestimoId: Long): Emprestimo
+  +devolver(emprestimoId: Long): Emprestimo
+  +listarPendencias(usuarioId: Long): List<Emprestimo>
+}
+
+class AuthorizationService {
+  -accessDecisionEngine: AccessDecisionEngine
+
+  +autorizarEmprestimo(usuario: Usuario, chave: Chave, motivo: MotivoEmprestimo): DecisaoAcesso
+  +autorizarDevolucao(usuario: Usuario, emprestimo: Emprestimo): DecisaoAcesso
+}
+
+class AuditoriaService {
+  -eventoAuditoriaRepository: EventoAuditoriaRepository
+
+  +registrarEvento(tipo: String, usuarioId: Long, chaveId: Long, descricao: String): void
+}
+
+class ArmarioIntegrationService {
+  -armarioGatewayClient: ArmarioGatewayClient
+
+  +liberarPosicao(chave: Chave, emprestimo: Emprestimo): void
+  +registrarDevolucaoFisica(chave: Chave, emprestimo: Emprestimo): void
+}
+
+class AccessDecisionEngine {
+  -politicaAcessoRepository: PoliticaAcessoRepository
+
+  +avaliarEmprestimo(usuario: Usuario, chave: Chave, dataHora: LocalDateTime): DecisaoAcesso
+  +avaliarDevolucao(usuario: Usuario, emprestimo: Emprestimo, dataHora: LocalDateTime): DecisaoAcesso
+}
+
+class Usuario {
+  +id: Long
+  +nome: String
+  +email: String
+  +ativo: boolean
+}
+
+class Chave {
+  +id: Long
+  +codigo: String
+  +descricao: String
+  +posicaoArmario: String
+  +ativo: boolean
+}
+
+class Emprestimo {
+  +id: Long
+  +usuarioId: Long
+  +chaveId: Long
+  +dataHoraSolicitacao: LocalDateTime
+  +dataHoraRetirada: LocalDateTime
+  +dataHoraDevolucao: LocalDateTime
+  +estado: EmprestimoEstado
+}
+
+enum EmprestimoEstado {
+  SOLICITADO
+  RETIRADO
+  DEVOLVIDO
+  ATRASADO
+}
+
+class MotivoEmprestimo {
+  +descricao: String
+}
+
+class DecisaoAcesso {
+  +permitido: boolean
+  +motivo: String
+}
+
+class EventoAuditoria {
+  +id: Long
+  +tipo: String
+  +descricao: String
+  +usuarioId: Long
+  +chaveId: Long
+  +dataHora: LocalDateTime
+}
+
+
+interface UsuarioRepository {
+  +findById(id: Long): Usuario
+  +save(usuario: Usuario): Usuario
+}
+
+interface ChaveRepository {
+  +findById(id: Long): Chave
+  +save(chave: Chave): Chave
+}
+
+interface EmprestimoRepository {
+  +findById(id: Long): Emprestimo
+  +findPendentesPorUsuario(usuarioId: Long): List<Emprestimo>
+  +save(emprestimo: Emprestimo): Emprestimo
+}
+
+interface PoliticaAcessoRepository {
+  +findByUsuarioEChave(usuario: Usuario, chave: Chave): List<PoliticaAcesso>
+}
+
+class PoliticaAcesso {
+  +id: Long
+  +nome: String
+}
+
+interface EventoAuditoriaRepository {
+  +save(evento: EventoAuditoria): EventoAuditoria
+}
+
+interface ArmarioGatewayClient {
+  +liberarSlot(idArmario: Long, posicao: String, idEmprestimo: Long): void
+}
+
+
+EmprestimoController --> EmprestimoService
+
+EmprestimoService --> AuthorizationService
+EmprestimoService --> AuditoriaService
+EmprestimoService --> ArmarioIntegrationService
+EmprestimoService --> UsuarioRepository
+EmprestimoService --> ChaveRepository
+EmprestimoService --> EmprestimoRepository
+
+AuthorizationService --> AccessDecisionEngine
+AuditoriaService --> EventoAuditoriaRepository
+ArmarioIntegrationService --> ArmarioGatewayClient
+
+AccessDecisionEngine --> PoliticaAcessoRepository
+
+Emprestimo --> Usuario
+Emprestimo --> Chave
+Emprestimo --> MotivoEmprestimo
+DecisaoAcesso --> Emprestimo
+
+@enduml

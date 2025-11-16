@@ -1,0 +1,65 @@
+@startuml sgrcf-containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_LEFT_RIGHT()
+
+' Pessoas
+Person(porteiro, "Colaborador da Portaria/Zeladoria", "Registra retiradas e devoluções de chaves.")
+Person(usuario, "Usuário Autorizado", "Solicita e utiliza chaves.")
+Person(gestor, "Gestor/Administrador", "Configura autorizações e consulta relatórios.")
+
+System_Boundary(sgrcf_boundary, "SGRCF - Sistema de Gestão de Chaves") {
+
+    Container(webPortaria, "Portal da Portaria", "Web App (Angular/React)", "Operações de entrega e devolução de chaves.")
+    Container(webGestao, "Portal Administrativo", "Web App (Angular/React)", "Configuração de políticas, autorizações e relatórios.")
+    Container(webUsuario, "Portal do Usuário", "Web/Mobile (PWA)", "Solicitação e acompanhamento de empréstimos.")
+
+    Container(apiCore, "API Core SGRCF", "Java / Spring Boot", "Regras de negócio, empréstimos, devoluções e auditorias.")
+    Container(moduleAuthz, "Módulo de Autorização", "Serviço Interno", "Avalia se um usuário pode pegar uma chave.")
+    ContainerDb(db, "Banco de Dados", "PostgreSQL", "Registros de usuários, chaves, autorizações e empréstimos.")
+    ContainerDb(dbAudit, "Banco de Auditoria", "PostgreSQL/Timescale", "Auditoria detalhada de eventos.")
+    Container(cache, "Cache", "Redis", "Sessões, tokens e permissões.")
+    Container(queue, "Fila de Eventos", "Kafka/RabbitMQ", "Eventos de empréstimo, devolução e notificações.")
+
+    Container(svcNotificacoes, "Serviço de Notificações", "Microsserviço", "Envio de e-mail/SMS/push.")
+    Container(svcPredial, "Serviço de Integração Predial", "Microsserviço", "Exporta eventos para sistemas de facilities.")
+    Container(svcArmario, "Gateway para Armários Inteligentes", "Microsserviço", "Comunica com o hardware de armários/chaveiros.")
+}
+
+' Sistemas externos
+System_Ext(armario, "Armário Inteligente", "Hardware IoT para liberação e guarda física de chaves.")
+System_Ext(sso, "Diretório Corporativo / SSO", "Autenticação via AD/LDAP/OIDC.")
+System_Ext(emailSvc, "Gateway de E-mail/SMS", "Envio de notificações.")
+System_Ext(predial, "Sistema de Facilities", "Consome dados de uso de chaves.")
+System_Ext(siem, "SIEM", "Consume logs de segurança.")
+
+' Relações
+Rel(porteiro, webPortaria, "Usa para registrar entrega/devolução.")
+Rel(usuario, webUsuario, "Usa para solicitar chaves.")
+Rel(gestor, webGestao, "Usa para configurar políticas e auditorias.")
+
+Rel(webPortaria, apiCore, "Consome API", "HTTPS")
+Rel(webGestao, apiCore, "Consome API", "HTTPS")
+Rel(webUsuario, apiCore, "Consome API", "HTTPS")
+
+Rel(apiCore, moduleAuthz, "Avalia permissões")
+Rel(apiCore, db, "Lê/Escreve")
+Rel(apiCore, dbAudit, "Registra auditoria")
+Rel(apiCore, cache, "Lê/Escreve cache")
+Rel(apiCore, queue, "Publica eventos")
+
+Rel(queue, svcNotificacoes, "Entrega eventos")
+Rel(queue, svcPredial, "Entrega eventos")
+
+Rel(svcNotificacoes, emailSvc, "Envio de notificações")
+Rel(svcPredial, predial, "Integração predial")
+
+Rel(apiCore, svcArmario, "Orquestra liberação")
+Rel(svcArmario, armario, "Comandos IoT")
+
+Rel(webPortaria, sso, "Autentica")
+Rel(webGestao, sso, "Autentica")
+Rel(webUsuario, sso, "Autentica")
+
+Rel(apiCore, siem, "Exporta logs/alertas")
+
+@enduml
