@@ -14,32 +14,19 @@ Matrícula: 2025200254
 
 O Modelo C4 é uma abordagem de documentação arquitetural criada por Simon Brown, cujo objetivo é representar sistemas de software através de diferentes níveis de abstração, de forma clara, gradual e compreensível para públicos técnicos e não técnicos. O nome faz referência aos seus quatro níveis de detalhamento: Contexto, Contêineres, Componentes e Código, permitindo visualizar desde o panorama geral do sistema até os detalhes de implementação.
 
-Neste documento, o Modelo C4 é aplicado ao SGRCF — Sistema de Gestão e Rastreamento de Chaves Físicas desenvolvido durante a disciplina de requisitos, uma solução proposta para controlar o ciclo de vida de chaves físicas utilizadas em ambientes corporativos, acadêmicos, residenciais ou institucionais. O sistema busca garantir governança, rastreabilidade, autorização baseada em regras, auditoria e redução de extravios, substituindo abordagens manuais, informais ou suscetíveis a falhas, como registros em papel, planilhas ou comunicação verbal.
+Neste documento, o Modelo C4 é aplicado ao SGRCF — Sistema de Gestão e Rastreamento de Chaves Físicas desenvolvido durante a disciplina de requisitos, uma solução proposta para controlar o ciclo de vida de chaves físicas utilizadas em ambientes corporativos, acadêmicos, residenciais ou institucionais.
 
 ---
 
 ## Objetivo do Sistema
 
-O SGRCF visa fornecer uma plataforma centralizada para registro, monitoramento e auditoria de empréstimos e devoluções de chaves físicas, respondendo às seguintes necessidades:
+O SGRCF busca garantir governança, rastreabilidade, autorização baseada em regras, auditoria e redução de extravios, substituindo abordagens manuais, informais ou suscetíveis a falhas, como registros em papel, planilhas ou comunicação verbal, por uma plataforma centralizada para registro, monitoramento e auditoria de empréstimos e devoluções de chaves físicas, respondendo às seguintes necessidades:
 
 - Identificar quem retirou uma chave, quando e com qual finalidade;  
 - Estabelecer regras de autorização baseadas em perfil, horário e setor;  
 - Registrar e auditar eventos de forma confiável e rastreável;  
 - Reduzir incidentes de extravio e acessos não autorizados;  
 - Integrar-se a dispositivos físicos como armários inteligentes e sistemas externos.
-
----
-
-## Estrutura do Documento
-
-O restante deste README está organizado nas seguintes seções:
-
-1. Nível 1 — Diagrama de Contexto  
-2. Nível 2 — Diagrama de Contêineres  
-3. Nível 3 — Diagrama de Componentes (quando aplicável)  
-4. Nível 4 — Visão de Código (opcional)  
-5. Tecnologias e Padrões Arquiteturais  
-6. Considerações Finais
 
 ---
 
