@@ -88,7 +88,7 @@ Também é apresentado o módulo de autorização e tomada de decisão, formado 
 
 Essa arquitetura favorece:
 
-- cohesão por funcionalidade e separação de responsabilidades  
+- coesão por funcionalidade e separação de responsabilidades  
 - evolução modular com possibilidade futura de microservices independentes  
 - testabilidade, uma vez que controllers, serviços e repositórios podem ser mockados  
 - auditabilidade, com registro detalhado do ciclo de vida das chaves  
