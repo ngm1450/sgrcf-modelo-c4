@@ -9,7 +9,6 @@ Aluno: Nícolas Georgeos Mantzos
 Matrícula: 2025200254  
 
 ---
-
 ## Introdução
 
 O Modelo C4 é uma abordagem de documentação arquitetural criada por Simon Brown, cujo objetivo é representar sistemas de software através de diferentes níveis de abstração, de forma clara, gradual e compreensível para públicos técnicos e não técnicos. O nome faz referência aos seus quatro níveis de detalhamento: Contexto, Contêineres, Componentes e Código, permitindo visualizar desde o panorama geral do sistema até os detalhes de implementação.
