@@ -31,7 +31,7 @@ O SGRCF busca garantir governança, rastreabilidade, autorização baseada em re
 
 ##  Nível 1 — Diagrama de Contexto
 
-![Diagrama de Contexto](./diagramas/imagens/diagramaContexto.jpeg)
+![Diagrama de Contexto](./diagramas/imagens/diagramaContexto.jpg)
 
 O Diagrama de Contexto apresenta uma visão macro do SGRCF, destacando seu papel dentro do ambiente organizacional, os usuários que interagem com o sistema e outros sistemas externos envolvidos.  
 Ele define quem utiliza o sistema, quem administra, quem concede o acesso e quais integrações externas complementam o fluxo de trabalho.
@@ -48,7 +48,7 @@ Principais destaques do contexto:
 
 ## Nível 2 — Diagrama de Contêineres
 
-![Diagrama de Contêineres](./diagramas/imagens/diagramaConteineres.jpeg)
+![Diagrama de Contêineres](./diagramas/imagens/diagramaConteineres.jpg)
 
 O Diagrama de Contêineres detalha como o SGRCF é estruturado em termos de tecnologias, módulos e responsabilidades.  
 Cada contêiner representa uma parte executável ou componente distribuível do sistema, tais como aplicações web, APIs, banco de dados e serviços auxiliares.
@@ -64,7 +64,7 @@ Essa arquitetura sugere uma abordagem escalável, segura e preparada para evolu�
 ---
 ## Nível 3 — Diagrama de Componentes
 
-![Diagrama de Componentes](./diagramas/imagens/diagramaComponentes.jpeg)
+![Diagrama de Componentes](./diagramas/imagens/diagramaComponentes.jpg)
 
 O Diagrama de Componentes aprofunda a visão arquitetural apresentada no nível de contêineres, detalhando de forma mais granular a organização interna do contêiner API Core SGRCF, que é responsável por todas as regras de negócio do sistema.  
 Esse diagrama descreve como a lógica do domínio é organizada, quais módulos compõem o serviço, como eles interagem entre si e como efetuam integrações com recursos externos, como cache, fila de eventos, autenticação corporativa e comunicação com armários inteligentes.
@@ -96,7 +96,7 @@ Essa arquitetura favorece:
 ---
 ## Nível 4 — Diagrama de Código
 
-![Diagrama de Código](./diagramas/imagens/diagramaCodigo.jpeg)
+![Diagrama de Código](./diagramas/imagens/diagramaCodigo.jpg)
 
 O Diagrama de Código representa o nível de maior granularidade dentro do Modelo C4, descrevendo de forma precisa os elementos internos da implementação e a relação entre eles. Neste nível, o foco deixa de ser arquitetura e estrutura do sistema para se concentrar na organização lógica do código-fonte, com destaque para o domínio, responsabilidades e dependências entre classes.
 
